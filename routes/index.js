@@ -7,9 +7,17 @@ module.exports = function(app){
         res.render('index', {title:'Express'});
     });
 
+    //leecher
     app.get(leecher.url, function(req, res, next){
         leecher.getList();
-
     });
+    app.post(leecher.url + '/addLink', function(req, res, next){
+
+        var body = req.body;
+
+
+
+        res.status(400).send({test:"1234"});
+    })
     return app;
 };

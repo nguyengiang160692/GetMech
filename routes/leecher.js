@@ -1,7 +1,7 @@
 var request = require('request');
 var cheerio = require('cheerio');
 var async   = require('async');
-var J       = require('underscore');
+var _       = require('underscore');
 var db      = require(__base + 'db/db');
 
 module.exports = function(url){
@@ -11,11 +11,15 @@ module.exports = function(url){
             db.links(function(links){
                 //this.getWeb('http://pimpmykeyboard.com/', 'ul.ProductList > li .ProductDetails > a');
                 var arrFnS = [];
-                J.each(links, function(link){
+
+                //get all from links
+
+                _.each(links, function(link){
                     arrFnS.push(function(callback){
                         callback(null, 'one');
                     });
                 });
+
                 async.parallel(arrFnS);
             });
         },
