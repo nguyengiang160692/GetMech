@@ -2,42 +2,35 @@ var mongodb = require('mongoose');
 mongodb.connect('mongodb://127.0.0.1/SearcherDB');
 
 //----------------------------------------------------------------------------------------------------------------------
-var db    = {};
+var db              = {};
 //----------------------------------------------------------------------------------------------------------------------
-var Links = mongodb.Schema({
+var Links           = mongodb.Schema({
     url     :{type:String, required:true},
     title   :{type:String},
     selector:{type:String},
     notify  :{type:Boolean, default:false},
     fn      :{
-        fnType :{type:String},
-        fnParam:[
-            {type:String}
+        fnType  :{type:String},
+        fnParams:[
+            {
+                name :{type:String},
+                value:{type:String}
+            }
         ]
     }
 });
-
-//cb:function(),
-//id:MongoId // for one link
-
-Links.statics.links = function(obj){
+Links.statics.links = function(cb){
     var params = {};
 
-    if(obj.id){
-        params._id = obj.id;
-    }
-
-    db.links.find(params).exec(function(err, allinks){
+    db.link.find(params).exec(function(err, allinks){
         if(err){
-            obj.cb && obj.cb(false);
+            cb && cb(false);
         }
-        obj.cb && obj.cb(allinks);
+        cb && cb(allinks);
     });
 };
-
 //----------------------------------------------------------------------------------------------------------------------
-db.links = mongodb.model('Link', Links);
-
-module.exports = db;
+db.link             = mongodb.model('Link', Links);
+module.exports      = db;
 
 

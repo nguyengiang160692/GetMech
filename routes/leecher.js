@@ -6,10 +6,10 @@ var db      = require(__base + 'db/db');
 
 module.exports = function(url){
     return {
-        url    :url,
-        getList:function(){
+        url     :url,
+        allLinks:function(){
             db.links(function(links){
-                //this.getWeb('http://pimpmykeyboard.com/', 'ul.ProductList > li .ProductDetails > a');
+                //this.getLink('http://pimpmykeyboard.com/', 'ul.ProductList > li .ProductDetails > a');
                 var arrFnS = [];
 
                 //get all from links
@@ -23,7 +23,7 @@ module.exports = function(url){
                 async.parallel(arrFnS);
             });
         },
-        getWeb :function(link, selector){
+        getLink :function(link, selector){
             request({
                 method:'GET',
                 url   :link
@@ -35,6 +35,14 @@ module.exports = function(url){
                     var html = $(this).html();
                     console.log(html);
                 });
+            });
+        },
+        addLink :function(inputs, cb){
+            var newLink = new db.link(inputs);
+
+            newLink.save(function(err, result){
+                if(err) cb && cb(false);
+                return cb && cb(result);
             });
         }
     };
