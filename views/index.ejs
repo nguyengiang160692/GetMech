@@ -334,7 +334,13 @@
                     var html = '';
                     html += '<div class="form-group">';
                     html += '   <div class="col-sm-4">';
-                    html += '       <input value="' + label + '"  name="selectors[' + this.currentIndex + '][label]" type="text" class="form-control" placeholder="Label">';
+                    html += '       <select class="form-control">';
+                    $.each($('#paramBlockList2 .form-group .col-sm-4 .form-control'), function(index, ele){
+                        if($(ele).val() != ""){
+                            html += '<option value="' + $(ele).val() + '">' + $(ele).val() + '</option>';
+                        }
+                    });
+                    html += '       </select>';
                     html += '   </div>';
                     html += '   <div class="col-sm-6">';
                     html += '       <input value="' + value + '"  name="selectors[' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
