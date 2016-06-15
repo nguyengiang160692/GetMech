@@ -123,14 +123,14 @@
                             <label class="col-sm-2 control-label">Notify</label>
                             <div class="col-sm-10">
                                 <label class="radio-inline">
-                                    <input type="radio" name="notify" value="1"> Yes
+                                    <input type="radio" name="notify[toggle]" value="1"> Yes
                                 </label>
                                 <label class="radio-inline">
-                                    <input type="radio" name="notify" value="0"> No
+                                    <input type="radio" name="notify[toggle]" value="0"> No
                                 </label>
                             </div>
                         </div>
-                        <div class="form-group hide" data-interact="notify">
+                        <div class="form-group hide" data-interact="notify[toggle]">
                             <label class="col-sm-2 control-label">Condition</label>
                             <div class="col-md-2">
                                 <button class="btn btn-success" type="button" onclick="formAddLink.fn.addBlockCondition()">
@@ -139,7 +139,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="form-group hide" data-interact="notify">
+                        <div class="form-group hide" data-interact="notify[toggle]">
                             <div class="col-md-10 col-md-offset-2" id="paramBlockList3">
                             </div>
                         </div>
@@ -156,246 +156,316 @@
             </div>
         </div>
     </div>
-    <script src='/bootstrap/js/jquery.js'></script>
-    <script src='/bootstrap/js/bootstrap.min.js'></script>
-    <script src='/bower_components/underscore/underscore-min.js'></script>
-    <script>
-        var page = {
-            allLinks  :function(){
-                $.get('/leecher', {}, function(res){
-                    var html = '';
-                    for(var x = 0 ; x < res.message.length ; x++){
-                        var item = res.message[x];
-                        html += ' <tr>';
+</div>
+<script src='/bootstrap/js/jquery.js'></script>
+<script src='/bootstrap/js/bootstrap.min.js'></script>
+<script src='/bower_components/underscore/underscore-min.js'></script>
+<script>
+    var page = {
+        rawLinks   :[],
+        allLinks   :function(){
+            var that = this;
+            $.get('/leecher', {}, function(res){
+                var html      = '';
+                that.rawLinks = res.message;
+                for(var x = 0 ; x < res.message.length ; x++){
+                    var item = res.message[x];
+                    html += ' <tr>';
 
-                        if(item.notify){
-                            html += '    <td><span class="glyphicon glyphicon-volume-up" aria-hidden="true"></span></td>';
-                        }else{
-                            html += '    <td></td>';
-                        }
+                    if(item.notify.toggle){
+                        html += '    <td><span class="glyphicon glyphicon-volume-up" aria-hidden="true"></span></td>';
 
-                        html += '    <td>' + item.title + '<p><small>' + item.url + '</small></p></td>';
-
-                        var subHtml = '';
-                        for(var y = 0 ; y < item.content.length ; y++){
-                            subHtml += '<p>' + item.content[y].label + ':' + item.content[y].value + '</p>';
-                        }
-                        html += '    <td>' + subHtml + '</td>';
-                        html += '    <td>' +
-                                '       <button class="btn btn-warning" onclick="page.editLink(\'' + item._id + '\')">Edit</button>' +
-                                '       <button class="btn btn-danger" onclick="page.removeLink(\'' + item._id + '\')">Remove</button>' +
-                                '    </td>';
-                        html += ' </tr>';
+                    }else{
+                        html += '    <td></td>';
                     }
 
-                    $('#ContentContainer tbody').empty().append(html);
-                });
-            },
-            addLink   :function(){
+                    html += '    <td>' + item.title + '<p><small>' + item.url + '</small></p></td>';
+
+                    var subHtml = '';
+                    for(var y = 0 ; y < item.content.length ; y++){
+                        subHtml += '<div class="item' + item._id + '">' + item.content[y].label + ':' + item.content[y].value + '</div>';
+                    }
+
+                    html += '    <td>' + subHtml + '</td>';
+                    html += '    <td>' +
+                            '       <button class="btn btn-warning" onclick="page.editLink(\'' + item._id + '\')">Edit</button>' +
+                            '       <button class="btn btn-danger" onclick="page.removeLink(\'' + item._id + '\')">Remove</button>' +
+                            '    </td>';
+                    html += ' </tr>';
+                }
+
+                $('#ContentContainer tbody').empty().append(html);
+
+                that.checkNotify();
+            });
+        },
+        addLink    :function(){
+            $('#addLink').modal('show');
+            formAddLink.resetForm();
+        },
+        editLink   :function(_id){
+            $.get('/leecher/show', {
+                id:_id
+            }, function(res){
                 $('#addLink').modal('show');
                 formAddLink.resetForm();
-            },
-            editLink  :function(_id){
-                $.get('/leecher/show', {
+                formAddLink.renderForm(res.message);
+            });
+        },
+        removeLink :function(_id){
+            if(confirm("Remove it?")){
+                $.post('/leecher/remove', {
                     id:_id
                 }, function(res){
-                    $('#addLink').modal('show');
-                    formAddLink.resetForm();
-                    formAddLink.renderForm(res.message);
-                });
-            },
-            removeLink:function(_id){
-                if(confirm("Remove it?")){
-                    $.post('/leecher/remove', {
-                        id:_id
-                    }, function(res){
-                        if(res.result)
-                            page.allLinks();
-                    });
-                }
-            }
-        };
-        function notify(type, message){
-            if(type){
-                $('#errorHandling').html('<div class="alert alert-success" role="alert"> <a href="#" class="alert-link">' + message + '</a> </div>');
-            }else{
-                $('#errorHandling').html('<div class="alert alert-danger" role="alert"> <a href="#" class="alert-link">' + message + '</a> </div>');
-            }
-        }
-        var formAddLink = {
-            resetForm :function(){
-                $('input[name="linkID"]').val('');
-                //fill the data in
-                $('input[name="url"]').val('');
-                $('input[name="title"]').val('');
-
-                $('select[name="fn[fnType]"]').val('');
-                $("select[name='fn[fnType]']").trigger('change');
-
-                $('#paramBlockList1').empty();
-                $('#paramBlockList2').empty();
-
-                $('#errorHandling').empty();
-
-                var radios = $('input:radio[name=notify]');
-                radios.filter('[value=0]').prop('checked', true);
-
-            },
-            renderForm:function(old){
-
-                $('input[name="linkID"]').val(old._id);
-
-                //fill the data in
-                $('input[name="url"]').val(old.url);
-                $('input[name="title"]').val(old.title);
-
-                $('select[name="fn[fnType]"]').val(old.fn.fnType);
-                $("select[name='fn[fnType]']").trigger('change');
-
-                _.each(old.fn.fnParams, function(param){
-                    formAddLink.fn.addBlock(param.name, param.value);
-                });
-
-                _.each(old.selectors, function(selec){
-                    formAddLink.fn.addBlockSelector(selec.label, selec.value);
-                });
-
-                var radios = $('input:radio[name=notify]');
-                radios.filter('[value=' + old.notify + ']').prop('checked', true);
-
-            },
-            saveLink  :function(){
-                var data = $('#addLink form').serializeArray();
-
-                $.post('/leecher/saveLink', data, function(res){
-                    if(res.result){
-                        notify(res.result, 'OK');
+                    if(res.result)
                         page.allLinks();
-                    }else{
-                        notify(res.result, res.message);
-                    }
-
                 });
-            },
-            fn        :{
-                currentIndex     :0,
-                addBlock         :function(name, value){
-                    this.currentIndex++;
-
-                    name  = !_.isUndefined(name) ? name : '';
-                    value = !_.isUndefined(value) ? value : '';
-
-                    var html = '';
-
-                    html += ' <div class="form-group">';
-                    html += '     <div class="col-sm-4">';
-                    html += '         <input value="' + name + '" name="fn[fnParams][' + this.currentIndex + '][name]" type="text" class="form-control" placeholder="Name">';
-                    html += '     </div>';
-                    html += '     <div class="col-sm-6">';
-                    html += '         <input  value="' + value + '" name="fn[fnParams][' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
-                    html += '     </div>';
-                    html += '     <div class="col-sm-2 text-right">';
-                    html += '         <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
-                    html += '             <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
-                    html += '         </button>';
-                    html += '     </div>';
-                    html += ' </div>';
-                    $('#paramBlockList1').append(html);
-
-                },
-                addBlockSelector :function(label, value){
-                    this.currentIndex++;
-
-                    label = !_.isUndefined(label) ? label : '';
-                    value = !_.isUndefined(value) ? value : '';
-
-                    var html = '';
-                    html += '<div class="form-group">';
-                    html += '   <div class="col-sm-4">';
-                    html += '       <input value="' + label + '"  name="selectors[' + this.currentIndex + '][label]" type="text" class="form-control" placeholder="Label">';
-                    html += '   </div>';
-                    html += '   <div class="col-sm-6">';
-                    html += '       <input value="' + value + '"  name="selectors[' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
-                    html += '   </div>';
-                    html += '   <div class="col-sm-2 text-right">';
-                    html += '      <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
-                    html += '          <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
-                    html += '      </button>';
-                    html += '   </div>';
-                    html += ' </div>';
-                    $('#paramBlockList2').append(html);
-                },
-                addBlockCondition:function(label, value){
-                    this.currentIndex++;
-
-                    label = !_.isUndefined(label) ? label : '';
-                    value = !_.isUndefined(value) ? value : '';
-
-                    var html = '';
-                    html += '<div class="form-group">';
-                    html += '   <div class="col-sm-4">';
-                    html += '       <select class="form-control">';
-                    $.each($('#paramBlockList2 .form-group .col-sm-4 .form-control'), function(index, ele){
-                        if($(ele).val() != ""){
-                            html += '<option value="' + $(ele).val() + '">' + $(ele).val() + '</option>';
+            }
+        },
+        checkNotify:function(){
+            //notify
+            for(var x = 0 ; x < this.rawLinks.length ; x++){
+                var item = this.rawLinks[x];
+                if(item.notify.toggle){
+                    _.each(item.notify.conditions, function(cond){
+                        switch(cond.condition){
+                            case 'visible':
+                                _.each(item.content, function(cont){
+                                    if(cont.label == cond.param){
+                                        if($('.item' + item._id).find(cond.value).is(":visible")){
+                                            alert('asd');
+                                        }
+                                    }
+                                });
+                                break;
                         }
-                    });
-                    html += '       </select>';
-                    html += '   </div>';
-                    html += '   <div class="col-sm-6">';
-                    html += '       <input value="' + value + '"  name="selectors[' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
-                    html += '   </div>';
-                    html += '   <div class="col-sm-2 text-right">';
-                    html += '      <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
-                    html += '          <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
-                    html += '      </button>';
-                    html += '   </div>';
-                    html += ' </div>';
-                    $('#paramBlockList3').append(html);
-                },
-                removeBlock      :function(ele, cloestBlock){
-                    $(ele).closest(cloestBlock).remove();
+                    })
                 }
             }
-        };
 
-        function changeType(){
-            $("select[name='fn[fnType]']").on('change', function(e){
-                function showOptions(type){
+        }
+    };
+    function notify(type, message){
+        if(type){
+            $('#errorHandling').html('<div class="alert alert-success" role="alert"> <a href="#" class="alert-link">' + message + '</a> </div>');
+        }else{
+            $('#errorHandling').html('<div class="alert alert-danger" role="alert"> <a href="#" class="alert-link">' + message + '</a> </div>');
+        }
+    }
+    var formAddLink = {
+        resetForm :function(){
+            $('input[name="linkID"]').val('');
+            //fill the data in
+            $('input[name="url"]').val('');
+            $('input[name="title"]').val('');
 
-                    var showType = $('.form-group').filter(function(){
-                        return $(this).data('interact') == 'fn[fnType]' && $(this).data('type') == type
-                    });
-
-                    showType.removeClass('hide');
-                }
-
-                $('.form-group[data-interact]').addClass('hide');
-
-                var type = $(this).val();
-                switch(type){
-                    case 'searchQuery':
-                        showOptions('searchQuery');
-                        //bind more here
-                        break;
-                }
-            });
+            $('select[name="fn[fnType]"]').val('');
             $("select[name='fn[fnType]']").trigger('change');
-        }
-        function changeNotify(){
-            $('input[name=notify]').on('change', function(){
-                if(this.value == 1){
-                    $('.form-group[data-interact=notify]').removeClass('hide');
-                }else{
-                    $('.form-group[data-interact=notify]').addClass('hide');
-                }
+
+            $('#paramBlockList1').empty();
+            $('#paramBlockList2').empty();
+            $('#paramBlockList3').empty();
+
+            $('#errorHandling').empty();
+
+            var radios = $('input:radio[name="notify[toggle]"]');
+            radios.filter('[value=0]').prop('checked', true);
+
+        },
+        renderForm:function(old){
+
+            $('input[name="linkID"]').val(old._id);
+
+            //fill the data in
+            $('input[name="url"]').val(old.url);
+            $('input[name="title"]').val(old.title);
+
+            $('select[name="fn[fnType]"]').val(old.fn.fnType);
+            $("select[name='fn[fnType]']").trigger('change');
+
+            _.each(old.fn.fnParams, function(param){
+                formAddLink.fn.addBlock(param.name, param.value);
             });
-        }
-        $(document).ready(function(){
-            changeType();
+
+            _.each(old.selectors, function(selec){
+                formAddLink.fn.addBlockSelector(selec.label, selec.value);
+            });
+            _.each(old.notify.conditions, function(condi){
+                formAddLink.fn.addBlockCondition(condi.param, condi.condition, condi.value);
+            });
+
+            var radios = $('input:radio[name="notify[toggle]"]');
+            radios.filter('[value=' + old.notify.toggle + ']').prop('checked', true);
+
             changeNotify();
-            page.allLinks();
+
+        },
+        saveLink  :function(){
+            var data = $('#addLink form').serializeArray();
+
+            $.post('/leecher/saveLink', data, function(res){
+                if(res.result){
+                    notify(res.result, 'OK');
+                    page.allLinks();
+                }else{
+                    notify(res.result, res.message);
+                }
+
+            });
+        },
+        fn        :{
+            currentIndex     :0,
+            addBlock         :function(name, value){
+                this.currentIndex++;
+
+                name  = !_.isUndefined(name) ? name : '';
+                value = !_.isUndefined(value) ? value : '';
+
+                var html = '';
+
+                html += ' <div class="form-group">';
+                html += '     <div class="col-sm-4">';
+                html += '         <input value="' + name + '" name="fn[fnParams][' + this.currentIndex + '][name]" type="text" class="form-control" placeholder="Name">';
+                html += '     </div>';
+                html += '     <div class="col-sm-6">';
+                html += '         <input  value="' + value + '" name="fn[fnParams][' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
+                html += '     </div>';
+                html += '     <div class="col-sm-2 text-right">';
+                html += '         <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
+                html += '             <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
+                html += '         </button>';
+                html += '     </div>';
+                html += ' </div>';
+                $('#paramBlockList1').append(html);
+
+            },
+            addBlockSelector :function(label, value){
+                this.currentIndex++;
+
+                label = !_.isUndefined(label) ? label : '';
+                value = !_.isUndefined(value) ? value : '';
+
+                var html = '';
+                html += '<div class="form-group">';
+                html += '   <div class="col-sm-4">';
+                html += '       <input value="' + label + '"  name="selectors[' + this.currentIndex + '][label]" type="text" class="form-control" placeholder="Label">';
+                html += '   </div>';
+                html += '   <div class="col-sm-7">';
+                html += '       <input value="' + value + '"  name="selectors[' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
+                html += '   </div>';
+                html += '   <div class="col-sm-1 text-right">';
+                html += '      <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
+                html += '          <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
+                html += '      </button>';
+                html += '   </div>';
+                html += ' </div>';
+                $('#paramBlockList2').append(html);
+                this.renderCondition();
+            },
+            addBlockCondition:function(param, condition, value){
+                this.currentIndex++;
+
+                param     = !_.isUndefined(param) ? param : '';
+                condition = !_.isUndefined(condition) ? condition : '';
+                value     = !_.isUndefined(value) ? value : '';
+
+                var html = '';
+                html += '<div class="form-group">';
+                html += '   <div class="col-sm-4">';
+                html += '       <select data-value="' + param + '" class="form-control select-param" name="notify[conditions][' + this.currentIndex + '][param]">';
+
+                html += '       </select>';
+                html += '   </div>';
+                html += '   <div class="col-sm-2">';
+                html += '       <select data-condition="' + condition + '"  class="form-control select-condition" name="notify[conditions][' + this.currentIndex + '][condition]">';
+                html += '           <option value="equal">Equal</option>';
+                html += '           <option value="notequal">Not Equal</option>';
+                html += '           <option value="visible">Visible</option>';
+                html += '       </select>';
+                html += '   </div>';
+                html += '   <div class="col-sm-5">';
+                html += '       <input value="' + value + '"  name="notify[conditions][' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
+                html += '   </div>';
+                html += '   <div class="col-sm-1 text-right">';
+                html += '      <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
+                html += '          <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
+                html += '      </button>';
+                html += '   </div>';
+                html += ' </div>';
+                $('#paramBlockList3').append(html);
+                this.renderCondition();
+            },
+            renderCondition  :function(){
+                var htmlSelect = '';
+                $.each($('#paramBlockList2 .form-group .col-sm-4 .form-control'), function(index, ele){
+                    if($(ele).val() != ""){
+                        htmlSelect += '<option value="' + $(ele).val() + '">' + $(ele).val() + '</option>';
+                    }
+                });
+                $('.select-param').html(htmlSelect);
+
+                $('.select-param').unbind('change');
+                $('.select-param').bind('change', function(){
+                    $(this).data('value', $(this).val());
+                });
+                $(".select-param").each(function(key, value){
+                    $(this).find("option[value='" + $(this).data('value') + "']").attr('selected', 'selected');
+                });
+
+                $('.select-condition').unbind('change');
+                $('.select-condition').bind('change', function(){
+                    $(this).data('condition', $(this).val());
+                });
+                $(".select-condition").each(function(key, value){
+                    $(this).find("option[value='" + $(this).data('condition') + "']").attr('selected', 'selected');
+                });
+
+            },
+            removeBlock      :function(ele, cloestBlock){
+                $(ele).closest(cloestBlock).remove();
+            }
+        }
+    };
+
+    function changeType(){
+        $("select[name='fn[fnType]']").on('change', function(e){
+            function showOptions(type){
+
+                var showType = $('.form-group').filter(function(){
+                    return $(this).data('interact') == 'fn[fnType]' && $(this).data('type') == type
+                });
+
+                showType.removeClass('hide');
+            }
+
+            $('.form-group[data-interact]').addClass('hide');
+
+            var type = $(this).val();
+            switch(type){
+                case 'searchQuery':
+                    showOptions('searchQuery');
+                    //bind more here
+                    break;
+            }
         });
-    </script>
+        $("select[name='fn[fnType]']").trigger('change');
+    }
+    function changeNotify(){
+        $('input[name="notify[toggle]"]').unbind('change');
+        $('input[name="notify[toggle]"]').bind('change', function(){
+            if($('input[name="notify[toggle]"]:checked').val() == 1){
+                $('.form-group[data-interact="notify[toggle]"]').removeClass('hide');
+            }else{
+                $('.form-group[data-interact="notify[toggle]"]').addClass('hide');
+            }
+        });
+        $('input[name="notify[toggle]"]').trigger('change');
+    }
+    $(document).ready(function(){
+        changeType();
+        changeNotify();
+        page.allLinks();
+    });
+</script>
 </body>
 </html>

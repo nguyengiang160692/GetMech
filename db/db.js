@@ -11,7 +11,16 @@ var Links = mongodb.Schema({
         label:{type:String},
         value:{type:String}
     }],
-    notify   :{type:Number, min:0, max:1, default:0},
+    notify   :{
+        toggle    :{type:Number, min:0, max:1, default:0},
+        conditions:[
+            {
+                param    :{type:String},
+                condition:{type:String},
+                value    :{type:String}
+            }
+        ]
+    },
     fn       :{
         fnType  :{type:String},
         fnParams:[
