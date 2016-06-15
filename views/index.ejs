@@ -233,7 +233,7 @@
                                 _.each(item.content, function(cont){
                                     if(cont.label == cond.param){
                                         if($('.item' + item._id).find(cond.value).is(":visible")){
-                                            alert('asd');
+                                            $('.item' + item._id).closest('tr').addClass('success');
                                         }
                                     }
                                 });
@@ -381,6 +381,7 @@
                 html += '           <option value="equal">Equal</option>';
                 html += '           <option value="notequal">Not Equal</option>';
                 html += '           <option value="visible">Visible</option>';
+                html += '           <option value="haveClassOrId">Has Class or ID</option>';
                 html += '       </select>';
                 html += '   </div>';
                 html += '   <div class="col-sm-5">';
