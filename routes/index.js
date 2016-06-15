@@ -7,14 +7,19 @@ module.exports = function(app){
     app.get('/', function(req, res, next){
         res.render('index', {title:'Express'});
     });
-
     //leecher
     app.get(leecher.url, function(req, res, next){
-        leecher.allLinks();
+        leecher.allLinks(function(result){
+            res.status(200).send({result:true, message:result})
+        });
     });
-
-    app.post(leecher.url + '/addLink', function(req, res, next){
-
+    app.get(leecher.url + '/show', function(req, res, next){
+        var id = req.param('id');
+        leecher.showLink(id, function(result){
+            res.status(200).send({result:true, message:result});
+        });
+    });
+    app.post(leecher.url + '/saveLink', function(req, res, next){
         var inputs = req.body;
         if(_.isEmpty(inputs.fn.fnType)){
             res.status(400).send({result:false});
@@ -29,15 +34,22 @@ module.exports = function(app){
                 break;
         }
 
-        leecher.addLink(inputs, function(newLink){
+        leecher.saveLink(inputs, function(newLink){
             //OK
             if(newLink){
                 res.status(200).send({result:true, message:newLink});
                 return true;
             }
-            res.status(400).send({result:false});
+            res.status(400).send({result:false, message:'Error'});
         });
 
     })
+    app.post(leecher.url + '/remove', function(req, res, next){
+        var inputs = req.body;
+        leecher.removeLink(inputs.id, function(result){
+            res.status(200).send({result:result});
+        });
+    })
+
     return app;
 };
