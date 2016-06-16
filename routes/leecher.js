@@ -26,7 +26,16 @@ module.exports = function(url){
                     switch(link.fn.fnType){
                         case 'searchQuery':
                             arrFnS.push(function(callback){
+
                                 that.readDataFromLink(combineUrlQuery(link.url, link.fn.fnParams), link.selectors, function(arrHtml){
+                                    link.content = arrHtml;
+                                    callback(null, link);
+                                });
+                            });
+                            break;
+                        default:
+                            arrFnS.push(function(callback){
+                                that.readDataFromLink(link.url, link.selectors, function(arrHtml){
                                     link.content = arrHtml;
                                     callback(null, link);
                                 });
@@ -59,11 +68,16 @@ module.exports = function(url){
 
                 _.each(selectors, function(selec){
                     $(selec.value).each(function(){
-                        var html = $(this).html();
+
+                        //content inside
+                        var html = $.html($(this));
                         arrResults.push({
                             label:selec.label,
-                            value:html
+                            html :html,
+                            id   :$(this).attr('id'),
+                            class:$(this).attr('class')
                         });
+
                     });
                 });
 

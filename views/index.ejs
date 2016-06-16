@@ -47,10 +47,10 @@
                     <table class="table table-striped" id="ContentContainer">
                         <thead>
                         <tr>
-                            <th width="10"></th>
-                            <th width="20">Title</th>
-                            <th width="50">Content</th>
-                            <th width="20"></th>
+                            <th width="10%"></th>
+                            <th width="20%">Title</th>
+                            <th width="50%">Content</th>
+                            <th width="20%"></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -96,7 +96,7 @@
                         <div class="form-group hide" data-interact="fn[fnType]" data-type="searchQuery">
                             <label class="col-md-2 control-label">Type Params</label>
                             <div class="col-md-2">
-                                <button class="btn btn-success" type="button" onclick="formAddLink.fn.addBlock()">
+                                <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlock()">
                                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                     Add parameter
                                 </button>
@@ -109,7 +109,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">Selector</label>
                             <div class="col-md-2">
-                                <button class="btn btn-success" type="button" onclick="formAddLink.fn.addBlockSelector()">
+                                <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlockSelector()">
                                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                     Add selector
                                 </button>
@@ -133,7 +133,7 @@
                         <div class="form-group hide" data-interact="notify[toggle]">
                             <label class="col-sm-2 control-label">Condition</label>
                             <div class="col-md-2">
-                                <button class="btn btn-success" type="button" onclick="formAddLink.fn.addBlockCondition()">
+                                <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlockCondition()">
                                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                     Add condition
                                 </button>
@@ -151,7 +151,7 @@
                         </div>
                     </div>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" onclick="formAddLink.saveLink()">Save link</button>
+                    <button type="button" class="btn btn-default" onclick="formAddLink.saveLink()">Save link</button>
                 </div>
             </div>
         </div>
@@ -162,8 +162,8 @@
 <script src='/bower_components/underscore/underscore-min.js'></script>
 <script>
     var page = {
-        rawLinks   :[],
-        allLinks   :function(){
+        rawLinks         :[],
+        allLinks         :function(){
             var that = this;
             $.get('/leecher', {}, function(res){
                 var html      = '';
@@ -179,17 +179,22 @@
                         html += '    <td></td>';
                     }
 
-                    html += '    <td>' + item.title + '<p><small>' + item.url + '</small></p></td>';
+                    html += '    <td>' + item.title + '<p><small><a target="_blank" href="' + item.url + '">' + item.url + '</a></small></p></td>';
 
                     var subHtml = '';
+
                     for(var y = 0 ; y < item.content.length ; y++){
-                        subHtml += '<div class="item' + item._id + '">' + item.content[y].label + ':' + item.content[y].value + '</div>';
+                        subHtml += '<div class="item item' + item._id + ' margin-hr-10" data-order="' + y + '"><b>' + item.content[y].label + ':</b><br>' + item.content[y].html + '</div>';
                     }
 
-                    html += '    <td>' + subHtml + '</td>';
+                    html += '<td>';
+                    html += '<div class="pre-scrollable small-font">';
+                    html += subHtml;
+                    html += '</div>';
+                    html += '</td>';
                     html += '    <td>' +
-                            '       <button class="btn btn-warning" onclick="page.editLink(\'' + item._id + '\')">Edit</button>' +
-                            '       <button class="btn btn-danger" onclick="page.removeLink(\'' + item._id + '\')">Remove</button>' +
+                            '       <button class="btn btn-default" onclick="page.editLink(\'' + item._id + '\')">Edit</button>' +
+                            '       <button class="btn btn-default" onclick="page.removeLink(\'' + item._id + '\')">Remove</button>' +
                             '    </td>';
                     html += ' </tr>';
                 }
@@ -199,11 +204,11 @@
                 that.checkNotify();
             });
         },
-        addLink    :function(){
+        addLink          :function(){
             $('#addLink').modal('show');
             formAddLink.resetForm();
         },
-        editLink   :function(_id){
+        editLink         :function(_id){
             $.get('/leecher/show', {
                 id:_id
             }, function(res){
@@ -212,7 +217,7 @@
                 formAddLink.renderForm(res.message);
             });
         },
-        removeLink :function(_id){
+        removeLink       :function(_id){
             if(confirm("Remove it?")){
                 $.post('/leecher/remove', {
                     id:_id
@@ -222,21 +227,66 @@
                 });
             }
         },
-        checkNotify:function(){
+        totalNotification:0,
+        checkNotify      :function(){
+            var that = this;
+            $('title').html('Waiting for happiness');
             //notify
             for(var x = 0 ; x < this.rawLinks.length ; x++){
                 var item = this.rawLinks[x];
                 if(item.notify.toggle){
+                    that.totalNotification = 0;
                     _.each(item.notify.conditions, function(cond){
+                        function success(){
+                            $('.item' + item._id).closest('tr').addClass('info');
+                            that.totalNotification++;
+                            $('title').html('(' + that.totalNotification + ')' + ' You have messages');
+                        }
+
                         switch(cond.condition){
                             case 'visible':
                                 _.each(item.content, function(cont){
                                     if(cont.label == cond.param){
                                         if($('.item' + item._id).find(cond.value).is(":visible")){
-                                            $('.item' + item._id).closest('tr').addClass('success');
+                                            success();
                                         }
                                     }
                                 });
+                                break;
+                            case 'haveClassOrId':
+                                _.each(item.content, function(cont){
+                                    if(cont.label == cond.param){
+                                        if($(cont.html).hasClass(cond.value) || $(cont.html).attr('id') == cont.id){
+                                            success();
+                                        }
+                                    }
+                                });
+                                break;
+                            case 'containwords':
+                                var arrString = [];
+                                arrString     = cond.value.split(',');
+                                var found     = 0;
+                                _.each(item.content, function(cont, key){
+                                    if(cont.label == cond.param){
+                                        for(var x = 0 ; x < arrString.length ; x++){
+                                            var contain = false;
+                                            if(cont.html.contains(arrString[x])){
+                                                contain = true;
+                                            }
+
+                                            if(contain){
+                                                $('.item' + item._id + '[data-order="' + key + '"]').addClass('success-bold');
+                                                found++;
+
+                                                break;
+                                            }
+                                        }
+
+                                    }
+                                });
+
+                                if(found > 0) success();
+
                                 break;
                         }
                     })
@@ -293,6 +343,7 @@
             _.each(old.notify.conditions, function(condi){
                 formAddLink.fn.addBlockCondition(condi.param, condi.condition, condi.value);
             });
+            formAddLink.fn.renderCondition();
 
             var radios = $('input:radio[name="notify[toggle]"]');
             radios.filter('[value=' + old.notify.toggle + ']').prop('checked', true);
@@ -331,7 +382,7 @@
                 html += '         <input  value="' + value + '" name="fn[fnParams][' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
                 html += '     </div>';
                 html += '     <div class="col-sm-2 text-right">';
-                html += '         <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
+                html += '         <button class="btn btn-default" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
                 html += '             <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
                 html += '         </button>';
                 html += '     </div>';
@@ -354,13 +405,12 @@
                 html += '       <input value="' + value + '"  name="selectors[' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
                 html += '   </div>';
                 html += '   <div class="col-sm-1 text-right">';
-                html += '      <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
+                html += '      <button class="btn btn-default" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
                 html += '          <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
                 html += '      </button>';
                 html += '   </div>';
                 html += ' </div>';
                 $('#paramBlockList2').append(html);
-                this.renderCondition();
             },
             addBlockCondition:function(param, condition, value){
                 this.currentIndex++;
@@ -372,7 +422,7 @@
                 var html = '';
                 html += '<div class="form-group">';
                 html += '   <div class="col-sm-4">';
-                html += '       <select data-value="' + param + '" class="form-control select-param" name="notify[conditions][' + this.currentIndex + '][param]">';
+                html += '       <select onclick="formAddLink.fn.renderCondition()" data-value="' + param + '" class="form-control select-param" name="notify[conditions][' + this.currentIndex + '][param]">';
 
                 html += '       </select>';
                 html += '   </div>';
@@ -382,19 +432,22 @@
                 html += '           <option value="notequal">Not Equal</option>';
                 html += '           <option value="visible">Visible</option>';
                 html += '           <option value="haveClassOrId">Has Class or ID</option>';
+                html += '           <option value="containwords">Contain words</option>';
                 html += '       </select>';
                 html += '   </div>';
                 html += '   <div class="col-sm-5">';
-                html += '       <input value="' + value + '"  name="notify[conditions][' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
+                html += '       <input value="' + value + '"  name="notify[conditions][' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value, Words (abc,xyz)">';
+                html += '       <span class="help-block small-font helper-condititon hide" data-condition="visible">Class like .abc or #abc that can visible</span>';
+                html += '       <span class="help-block small-font helper-condititon hide" data-condition="haveClassOrId">Class like .abc or #abc</span>';
+                html += '       <span class="help-block small-font helper-condititon hide" data-condition="containwords">This contains word like abc,xyz use ","</span>';
                 html += '   </div>';
                 html += '   <div class="col-sm-1 text-right">';
-                html += '      <button class="btn btn-danger" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
+                html += '      <button class="btn btn-default" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
                 html += '          <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>';
                 html += '      </button>';
                 html += '   </div>';
                 html += ' </div>';
                 $('#paramBlockList3').append(html);
-                this.renderCondition();
             },
             renderCondition  :function(){
                 var htmlSelect = '';
@@ -416,6 +469,7 @@
                 $('.select-condition').unbind('change');
                 $('.select-condition').bind('change', function(){
                     $(this).data('condition', $(this).val());
+                    $('.helper-condititon[data-condition="' + $(this).val() + '"]').siblings('.help-block').addClass('hide').end().removeClass('hide');
                 });
                 $(".select-condition").each(function(key, value){
                     $(this).find("option[value='" + $(this).data('condition') + "']").attr('selected', 'selected');
@@ -462,10 +516,16 @@
         });
         $('input[name="notify[toggle]"]').trigger('change');
     }
+
+    var reloadTime = null;
+
     $(document).ready(function(){
         changeType();
         changeNotify();
         page.allLinks();
+        reloadTime = setInterval(function(){
+            page.allLinks();
+        }, 5 * 60000);
     });
 </script>
 </body>
