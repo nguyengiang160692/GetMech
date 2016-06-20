@@ -6,19 +6,25 @@ a {
     color : #00B7FF
 }
 .small-font {
-    font-size : 11px;
+    font-size : 11px
 }
 .margin-hr-10 {
-    margin : 5px;
+    margin : 5px 0px;
+}
+.item {
+    -webkit-box-sizing : border-box;
+    -moz-box-sizing    : border-box;
+    box-sizing         : border-box;
+    padding            : 5px;
 }
 .item a {
-    color : #000000;
+    color : #000000
 }
 .success-bold {
     font-weight : bold;
-    border      : 1px dashed #525252;
-    padding     : 5px;
+    background  : #FF799E;
+    color       : #FFFFFF;
 }
 .success-bold a {
-    color : #FF4500;
+    color : #FFFFFF
 }

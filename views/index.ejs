@@ -6,6 +6,7 @@
     <link rel="stylesheet" href='/bootstrap/css/bootstrap-theme.min.css'>
     <link rel="stylesheet" href='/bootstrap/css/dashboard.css'>
     <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <link rel='stylesheet' href='/stylesheets/test.css'/>
 </head>
 <body>
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -38,6 +39,9 @@
                 <li>
                     <a onclick="page.addLink()" href="#">Add Link</a>
                 </li>
+                <li>
+                    <a onclick="page.addTester()" href="#">Tester</a>
+                </li>
             </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -60,103 +64,109 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="addLink" tabindex="-1" role="dialog" aria-labelledby="addLinkLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title" id="addLinkLabel">Link</h4>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal">
-                        <input type="hidden" name="linkID" value="">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Url</label>
-                            <div class="col-sm-10">
-                                <input name="url" type="text" class="form-control" placeholder="Url to leech">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Title</label>
-                            <div class="col-sm-10">
-                                <input name="title" type="text" class="form-control" placeholder="Title">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Type</label>
-                            <div class="col-sm-10">
-                                <select name="fn[fnType]" class="form-control" placeholder="Type">
-                                    <option value="0">Choose type</option>
-                                    <option value="searchQuery">searchQuery</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group hide" data-interact="fn[fnType]" data-type="searchQuery">
-                            <label class="col-md-2 control-label">Type Params</label>
-                            <div class="col-md-2">
-                                <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlock()">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                    Add parameter
-                                </button>
-                            </div>
-                        </div>
-                        <div class="form-group hide" data-interact="fn[fnType]" data-type="searchQuery">
-                            <div class="col-md-10 col-md-offset-2" id="paramBlockList1">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Selector</label>
-                            <div class="col-md-2">
-                                <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlockSelector()">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                    Add selector
-                                </button>
-                            </div>
-                        </div>
-                        <div class="form-group ">
-                            <div class="col-md-10 col-md-offset-2" id="paramBlockList2">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Notify</label>
-                            <div class="col-sm-10">
-                                <label class="radio-inline">
-                                    <input type="radio" name="notify[toggle]" value="1"> Yes
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="notify[toggle]" value="0"> No
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group hide" data-interact="notify[toggle]">
-                            <label class="col-sm-2 control-label">Condition</label>
-                            <div class="col-md-2">
-                                <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlockCondition()">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                    Add condition
-                                </button>
-                            </div>
-                        </div>
-                        <div class="form-group hide" data-interact="notify[toggle]">
-                            <div class="col-md-10 col-md-offset-2" id="paramBlockList3">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <div class="row">
-                        <div class="col-md-12 text-left" id="errorHandling">
+</div>
+<div class="modal fade" id="addLink" tabindex="-1" role="dialog" aria-labelledby="addLinkLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="addLinkLabel">Link</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <input type="hidden" name="linkID" value="">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Url</label>
+                        <div class="col-sm-10">
+                            <input name="url" type="text" class="form-control" placeholder="Url to leech">
                         </div>
                     </div>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-default" onclick="formAddLink.saveLink()">Save link</button>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Title</label>
+                        <div class="col-sm-10">
+                            <input name="title" type="text" class="form-control" placeholder="Title">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Type</label>
+                        <div class="col-sm-10">
+                            <select name="fn[fnType]" class="form-control" placeholder="Type">
+                                <option value="0">Choose type</option>
+                                <option value="customHeader">customHeader</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group hide" data-interact="fn[fnType]" data-type="customHeader">
+                        <label class="col-md-2 control-label">Header</label>
+                        <div class="col-md-10">
+                            <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlock()">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                Add parameter
+                            </button>
+                            OR
+                            <button class="btn btn-default" type="button" onclick="formAddLink.fn.parseHeader()">
+                                <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
+                                Parse header string
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group hide" data-interact="fn[fnType]" data-type="customHeader">
+                        <div class="col-md-10 col-md-offset-2" id="paramBlockList1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Selector</label>
+                        <div class="col-md-2">
+                            <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlockSelector()">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                Add selector
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group ">
+                        <div class="col-md-10 col-md-offset-2" id="paramBlockList2">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Notify</label>
+                        <div class="col-sm-10">
+                            <label class="radio-inline">
+                                <input type="radio" name="notify[toggle]" value="1"> Yes
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="notify[toggle]" value="0"> No
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group hide" data-interact="notify[toggle]">
+                        <label class="col-sm-2 control-label">Condition</label>
+                        <div class="col-md-2">
+                            <button class="btn btn-default" type="button" onclick="formAddLink.fn.addBlockCondition()">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                Add condition
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group hide" data-interact="notify[toggle]">
+                        <div class="col-md-10 col-md-offset-2" id="paramBlockList3">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="col-md-12 text-left" id="errorHandling">
+                    </div>
                 </div>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default" onclick="formAddLink.saveLink()">Save link</button>
             </div>
         </div>
     </div>
 </div>
+<div id="modalContainer"></div>
 <script src='/bootstrap/js/jquery.js'></script>
 <script src='/bootstrap/js/bootstrap.min.js'></script>
 <script src='/bower_components/underscore/underscore-min.js'></script>
@@ -184,11 +194,11 @@
                     var subHtml = '';
 
                     for(var y = 0 ; y < item.content.length ; y++){
-                        subHtml += '<div class="item item' + item._id + ' margin-hr-10" data-order="' + y + '"><b>' + item.content[y].label + ':</b><br>' + item.content[y].html + '</div>';
+                        subHtml += '<div class="col-sm-6 item item' + item._id + ' margin-hr-10" data-order="' + y + '"><b>' + item.content[y].label + ':</b><br>' + item.content[y].html + '</div>';
                     }
 
                     html += '<td>';
-                    html += '<div class="pre-scrollable small-font">';
+                    html += '<div class="pre-scrollable small-font row">';
                     html += subHtml;
                     html += '</div>';
                     html += '</td>';
@@ -403,6 +413,7 @@
                 html += '   </div>';
                 html += '   <div class="col-sm-7">';
                 html += '       <input value="' + value + '"  name="selectors[' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value">';
+                html += '       <span class="help-block helper-order-' + this.currentIndex + ' small-font helper-condititon ">Html Selector or JSON selector <a href="http://jsonselector.com/process">http://jsonselector.com/process</a></span>';
                 html += '   </div>';
                 html += '   <div class="col-sm-1 text-right">';
                 html += '      <button class="btn btn-default" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
@@ -427,7 +438,7 @@
                 html += '       </select>';
                 html += '   </div>';
                 html += '   <div class="col-sm-2">';
-                html += '       <select data-condition="' + condition + '"  class="form-control select-condition" name="notify[conditions][' + this.currentIndex + '][condition]">';
+                html += '       <select data-order="' + this.currentIndex + '" data-condition="' + condition + '"  class="form-control select-condition" name="notify[conditions][' + this.currentIndex + '][condition]">';
                 html += '           <option value="equal">Equal</option>';
                 html += '           <option value="notequal">Not Equal</option>';
                 html += '           <option value="visible">Visible</option>';
@@ -437,9 +448,9 @@
                 html += '   </div>';
                 html += '   <div class="col-sm-5">';
                 html += '       <input value="' + value + '"  name="notify[conditions][' + this.currentIndex + '][value]" type="text" class="form-control" placeholder="Value, Words (abc,xyz)">';
-                html += '       <span class="help-block small-font helper-condititon hide" data-condition="visible">Class like .abc or #abc that can visible</span>';
-                html += '       <span class="help-block small-font helper-condititon hide" data-condition="haveClassOrId">Class like .abc or #abc</span>';
-                html += '       <span class="help-block small-font helper-condititon hide" data-condition="containwords">This contains word like abc,xyz use ","</span>';
+                html += '       <span class="help-block helper-order-' + this.currentIndex + ' small-font helper-condititon hide" data-condition="visible">Class like .abc or #abc that can visible</span>';
+                html += '       <span class="help-block helper-order-' + this.currentIndex + ' small-font helper-condititon hide" data-condition="haveClassOrId">Class like .abc or #abc</span>';
+                html += '       <span class="help-block helper-order-' + this.currentIndex + ' small-font helper-condititon hide" data-condition="containwords">This contains word like abc,xyz use ","</span>';
                 html += '   </div>';
                 html += '   <div class="col-sm-1 text-right">';
                 html += '      <button class="btn btn-default" type="button" onclick="formAddLink.fn.removeBlock(this,\'.form-group\')">';
@@ -469,19 +480,69 @@
                 $('.select-condition').unbind('change');
                 $('.select-condition').bind('change', function(){
                     $(this).data('condition', $(this).val());
-                    $('.helper-condititon[data-condition="' + $(this).val() + '"]').siblings('.help-block').addClass('hide').end().removeClass('hide');
+                    var order = $(this).data('order');
+                    $('.helper-condititon[data-condition="' + $(this).val() + '"].helper-order-' + order).siblings('.help-block').addClass('hide').end().removeClass('hide');
                 });
                 $(".select-condition").each(function(key, value){
                     $(this).find("option[value='" + $(this).data('condition') + "']").attr('selected', 'selected');
                 });
-
             },
             removeBlock      :function(ele, cloestBlock){
                 $(ele).closest(cloestBlock).remove();
+            },
+            parseHeader      :function(execute){
+                if(execute){
+                    var lines = $('#textareaParseHeader').val().split('\n');
+                    for(var i = 0 ; i < lines.length ; i++){
+                        var keyValue = lines[i].split(': ');
+                        formAddLink.fn.addBlock(keyValue[0], keyValue[1]);
+                    }
+                    closeModal('parseHeader');
+                    return true;
+                }
+                var html = '';
+                html += '';
+                html += ' <form class="form-horizontal">';
+                html += '      <div class="form-group">';
+                html += '          <label class="col-sm-2 control-label">Header</label>';
+                html += '          <div class="col-sm-10">';
+                html += '              <textarea id="textareaParseHeader" style="min-height:250px;" row="5" name="header" type="text" class="form-control" placeholder="Custom header "></textarea>';
+                html += '          </div>';
+                html += '      </div>';
+                html += '  </form>';
+                openModal('parseHeader', html, "formAddLink.fn.parseHeader(true)");
             }
         }
     };
+    function openModal(id, body, submitFunc){
+        var html = '';
+        html += '   <div class="modal fade" id="' + id + '" tabindex="-1" role="dialog" aria-labelledby="addLinkLabel">';
+        html += '        <div class="modal-dialog modal-lg" role="document">';
+        html += '            <div class="modal-content">';
+        html += '               <div class="modal-body">';
+        html += body;
+        html += '               </div>';
+        html += '               <div class="modal-footer">';
+        html += '                   <div class="row">';
+        html += '                       <div class="col-md-12 text-left" id="errorHandling">';
+        html += '                       </div>';
+        html += '                   </div>';
+        html += '                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+        html += '                   <button type="button" class="btn btn-default" onclick="' + submitFunc + '">OK</button>';
+        html += '               </div>';
+        html += '           </div>';
+        html += '       </div>';
+        html += '   </div>';
+        $('body #modalContainer').empty().append(html);
+        $('body #modalContainer #' + id).modal('show');
 
+        $(document).on('hidden.bs.modal', '.modal', function(){
+            $('.modal:visible').length && $(document.body).addClass('modal-open');
+        });
+    }
+    function closeModal(id){
+        $('body #modalContainer #' + id).modal('hide');
+    }
     function changeType(){
         $("select[name='fn[fnType]']").on('change', function(e){
             function showOptions(type){
@@ -497,8 +558,8 @@
 
             var type = $(this).val();
             switch(type){
-                case 'searchQuery':
-                    showOptions('searchQuery');
+                case 'customHeader':
+                    showOptions('customHeader');
                     //bind more here
                     break;
             }
