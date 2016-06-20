@@ -9,38 +9,38 @@ function checkURL(url){
 module.exports = function(url){
     return {
         url             :url,
-        allLinks        :function(cb){
+        getLink         :function(_id, callback){
             var that = this;
+            db.link.get(_id, function(link){
+                link = link.toJSON();
+                switch(link.fn.fnType){
+                    case 'customHeader':
+                        var headers = _.object(_.pluck(link.fn.fnParams, 'name'), _.pluck(link.fn.fnParams, 'value'));
+                        that.readDataFromLink(link.url, link.selectors, {
+                            headers:headers
+                        }, function(arrHtml){
+                            link.content = arrHtml;
+                            callback && callback(link);
+                        });
+                        break;
+                    default:
+                        that.readDataFromLink(link.url, link.selectors, {}, function(arrHtml){
+                            link.content = arrHtml;
+                            callback && callback(link);
+                        });
+                        break;
+                }
+            });
+
+        },
+        allLinks        :function(cb){
             db.link.all(function(links){
                 var arrFnS = [];
                 _.each(links, function(link){
                     link = link.toJSON();
-                    switch(link.fn.fnType){
-                        case 'customHeader':
-                            arrFnS.push(function(callback){
-                                var headers = _.object(_.pluck(link.fn.fnParams, 'name'), _.pluck(link.fn.fnParams, 'value'));
-                                that.readDataFromLink(link.url, link.selectors, {
-                                    headers:headers
-                                }, function(arrHtml){
-                                    link.content = arrHtml;
-                                    callback(null, link);
-                                });
-                            });
-                            break;
-                        default:
-                            arrFnS.push(function(callback){
-                                that.readDataFromLink(link.url, link.selectors, {}, function(arrHtml){
-                                    link.content = arrHtml;
-                                    callback(null, link);
-                                });
-                            });
-                            break;
-                    }
-
+                    arrFnS.push(link);
                 });
-                async.parallel(arrFnS, function(err, results){
-                    cb && cb(results);
-                });
+                cb && cb(arrFnS);
             });
         },
         showLink        :function(_id, cb){

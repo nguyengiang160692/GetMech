@@ -13,6 +13,12 @@ module.exports = function(app){
             res.status(200).send({result:true, message:result})
         });
     });
+    app.get(leecher.url + '/showLeechedData', function(req, res, next){
+        var id = req.param('id');
+        leecher.getLink(id, function(result){
+            res.status(200).send({result:true, message:result});
+        });
+    });
     app.get(leecher.url + '/show', function(req, res, next){
         var id = req.param('id');
         leecher.showLink(id, function(result){
