@@ -168,8 +168,8 @@
 <script src='/bower_components/underscore/underscore-min.js'></script>
 <script>
     var page = {
-        rawLinks         :[],
-        getLink          :function(id){
+        rawLinks   :[],
+        getLink    :function(id){
             var that = this;
             $('#ContentContainer tbody tr#' + id).empty().append('<td align="center"><object data="/gear.svg" type="image/svg+xml"></object></td>');
             $.get('/leecher/showLeechedData', {
@@ -208,7 +208,7 @@
                 that.checkNotify(item);
             });
         },
-        allLinks         :function(){
+        allLinks   :function(){
             var that = this;
             $.get('/leecher', {}, function(res){
                 var html      = '';
@@ -221,11 +221,11 @@
                 $('#ContentContainer tbody').empty().append(html);
             });
         },
-        addLink          :function(){
+        addLink    :function(){
             $('#addLink').modal('show');
             formAddLink.resetForm();
         },
-        editLink         :function(_id){
+        editLink   :function(_id){
             $.get('/leecher/show', {
                 id:_id
             }, function(res){
@@ -234,7 +234,7 @@
                 formAddLink.renderForm(res.message);
             });
         },
-        removeLink       :function(_id){
+        removeLink :function(_id){
             if(confirm("Remove it?")){
                 $.post('/leecher/remove', {
                     id:_id
@@ -244,15 +244,12 @@
                 });
             }
         },
-        totalNotification:0,
-        checkNotify      :function(item){
+        checkNotify:function(item){
             var that = this;
             if(item.notify.toggle){
                 _.each(item.notify.conditions, function(cond){
                     function success(){
                         $('.item' + item._id).closest('tr').addClass('info');
-                        that.totalNotification++;
-                        $('title').html('(' + that.totalNotification + ')' + ' You have messages');
                     }
 
                     switch(cond.condition){
